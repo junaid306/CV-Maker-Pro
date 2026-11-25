@@ -1,0 +1,47 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}PDF Importer — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">PDF-to-JSON Importer</h1>
+<form method="post" action="{% url 'panel_importer_upload' %}" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm p-5 mb-6 max-w-xl">
+  {% csrf_token %}
+  <label class="text-sm font-medium block mb-1">Template name</label>
+  <input name="name" class="w-full rounded-lg border border-gray-200 px-3 py-2 text-sm mb-3" placeholder="e.g. Modern Green CV">
+  <label class="text-sm font-medium block mb-1">Source PDF (max 10 MB)</label>
+  <input name="pdf" type="file" accept="application/pdf" class="mb-4 text-sm" required>
+  <button class="rounded-lg bg-[#16A34A] text-white text-sm px-4 py-2">Upload &amp; convert</button>
+  <p class="text-xs text-gray-400 mt-2">Previews are rendered from generated JSON (never the original PDF). Scanned pages need manual correction. Admin approval is required before publishing.</p>
+</form>
+<div class="bg-white rounded-xl shadow-sm overflow-hidden">
+  <table class="w-full text-sm">
+    <thead class="bg-[#F3F7F4] text-left text-gray-500"><tr>
+      <th class="px-4 py-2">#</th><th class="px-4 py-2">Name</th><th class="px-4 py-2">Status</th>
+      <th class="px-4 py-2">Which warnings</th><th class="px-4 py-2">Actions</th>
+    </tr></thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr class="border-t border-gray-100 align-top">
+        <td class="px-4 py-2">{{ job.pk }}</td>
+        <td class="px-4 py-2">
+          {{ job.name|default:"(unnamed)" }}
+          {% if job.preview_png %}<div class="mt-1"><a href="{{ job.preview_png.url }}" target="_blank" class="text-[#16A34A] text-xs hover:underline">preview PNG (from JSON)</a></div>{% endif %}
+          <div class="mt-1"><a href="{{ job.source_pdf.url }}" target="_blank" class="text-gray-500 text-xs hover:underline">original PDF</a></div>
+        </td>
+        <td class="px-4 py-2">{{ job.status }}</td>
+        <td class="px-4 py-2 text-xs text-gray-500 max-w-xs">
+          {% for w in job.warnings %}<div>• {{ w }}</div>{% endfor %}
+          {% for e in job.errors %}<div class="text-red-600">✕ {{ e }}</div>{% endfor %}
+        </td>
+        <td class="px-4 py-2 space-x-2">
+          {% if job.status == 'needs_review' %}
+          <form method="post" action="{% url 'panel_importer_publish' job.pk %}" class="inline">{% csrf_token %}
+            <button class="text-xs text-emerald-700 font-semibold">Approve &amp; publish</button></form>{% endif %}
+          {% if job.status == 'failed' %}
+          <form method="post" action="{% url 'panel_importer_retry' job.pk %}" class="inline">{% csrf_token %}
+            <button class="text-xs text-blue-600">Retry</button></form>{% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

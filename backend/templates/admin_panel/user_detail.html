@@ -1,0 +1,20 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}User {{ target.email }}{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-2">{{ target.email }}</h1>
+<p class="text-sm text-gray-500 mb-6">{{ target.is_guest|yesno:"Guest account,Registered account" }} · joined {{ target.date_joined|date:"Y-m-d H:i" }}</p>
+<div class="grid md:grid-cols-2 gap-6">
+  <div class="bg-white rounded-xl shadow-sm p-5">
+    <h2 class="font-semibold mb-3">CVs ({{ target.resumes.count }})</h2>
+    <ul class="text-sm space-y-1">{% for r in resumes %}<li>{{ r.title }} <span class="text-gray-400">· {{ r.updated_at|date:"Y-m-d" }}</span></li>{% empty %}<li class="text-gray-400">None</li>{% endfor %}</ul>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm p-5">
+    <h2 class="font-semibold mb-3">Recent AI usage</h2>
+    <ul class="text-sm space-y-1">{% for g in generations %}<li>{{ g.feature }} · {{ g.status }} · {{ g.created_at|date:"m-d H:i" }}</li>{% empty %}<li class="text-gray-400">None</li>{% endfor %}</ul>
+  </div>
+  <div class="bg-white rounded-xl shadow-sm p-5 md:col-span-2">
+    <h2 class="font-semibold mb-3">Reward sessions</h2>
+    <ul class="text-sm space-y-1">{% for s in reward_sessions %}<li>#{{ s.pk }} {{ s.purpose }} · {{ s.verified_count }}/{{ s.required_count }} · {{ s.status }}</li>{% empty %}<li class="text-gray-400">None</li>{% endfor %}</ul>
+  </div>
+</div>
+{% endblock %}

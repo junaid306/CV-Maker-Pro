@@ -1,0 +1,22 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}{{ template.name }} — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-1">{{ template.name }}</h1>
+<p class="text-sm text-gray-500 mb-4">{{ template.category.name }} · {{ template.layout }} · {{ template.page_size|upper }} · status: {{ template.status }}</p>
+<div class="flex gap-2 mb-6">
+  <form method="post" action="{% url 'panel_template_publish' template.pk %}">{% csrf_token %}
+    <button class="rounded-lg bg-[#16A34A] text-white text-sm px-4 py-2">Publish</button></form>
+  <form method="post" action="{% url 'panel_template_unpublish' template.pk %}">{% csrf_token %}
+    <button class="rounded-lg bg-white border text-sm px-4 py-2">Unpublish</button></form>
+  <form method="post" action="{% url 'panel_template_archive' template.pk %}">{% csrf_token %}
+    <button class="rounded-lg bg-white border text-sm px-4 py-2">Archive</button></form>
+</div>
+<form method="post" action="{% url 'panel_template_json' template.pk %}">
+  {% csrf_token %}
+  <label class="text-sm font-semibold block mb-1">Definition JSON (saves as a new draft version)</label>
+  <textarea name="definition" rows="16" class="w-full rounded-lg border border-gray-200 font-mono text-xs p-3">{{ definition_json }}</textarea>
+  <button class="mt-2 rounded-lg bg-[#16A34A] text-white text-sm px-4 py-2">Save new version</button>
+</form>
+<h2 class="font-semibold mt-6 mb-2">Versions</h2>
+<ul class="text-sm text-gray-600">{% for v in versions %}<li>v{{ v.version_no }} · {{ v.created_at|date:"Y-m-d H:i" }} · published: {{ v.published_at|default:"-" }}</li>{% endfor %}</ul>
+{% endblock %}

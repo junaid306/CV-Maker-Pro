@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin Login — CV Maker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#F3F7F4] min-h-screen flex items-center justify-center">
+  <div class="w-full max-w-sm bg-white rounded-2xl shadow p-8">
+    <h1 class="text-2xl font-extrabold text-[#16A34A] mb-1">CV Maker</h1>
+    <p class="text-sm text-gray-500 mb-6">Admin Panel</p>
+    {% if messages %}{% for m in messages %}<div class="mb-3 text-sm text-red-600">{{ m }}</div>{% endfor %}{% endif %}
+    <form method="post" class="space-y-4">
+      {% csrf_token %}
+      <input name="email" type="email" placeholder="Admin email" class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#16A34A]" required>
+      <input name="password" type="password" placeholder="Password" class="w-full rounded-lg border border-gray-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#16A34A]" required>
+      <button class="w-full rounded-lg bg-[#16A34A] text-white font-semibold py-2 hover:bg-green-700">Sign in</button>
+    </form>
+  </div>
+</body>
+</html>

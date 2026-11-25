@@ -1,0 +1,21 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}Shared Avatars — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Shared Default Avatars</h1>
+<p class="text-sm text-gray-500 mb-4">Store 2–3 avatars once. Templates reference keys like <code>avatar_01</code>; sample photos are never extracted from PDFs.</p>
+<form method="post" enctype="multipart/form-data" class="bg-white rounded-xl shadow-sm p-5 mb-6 flex items-end gap-3 max-w-xl">
+  {% csrf_token %}
+  <div><label class="text-xs text-gray-500 block">Key</label>
+    <input name="key" placeholder="avatar_04" class="rounded border border-gray-200 px-2 py-1.5 text-sm" required></div>
+  <div><label class="text-xs text-gray-500 block">Image</label><input name="file" type="file" accept="image/*" required></div>
+  <button class="rounded-lg bg-[#16A34A] text-white text-sm px-4 py-2">Save avatar</button>
+</form>
+<div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+  {% for a in assets %}
+  <div class="bg-white rounded-xl shadow-sm p-3 text-center">
+    <img src="{{ a.file.url }}" class="w-16 h-16 rounded-full object-cover mx-auto mb-2">
+    <div class="text-xs font-medium">{{ a.key }}</div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

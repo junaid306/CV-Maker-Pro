@@ -1,0 +1,49 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}AI Providers — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">AI Providers</h1>
+<form method="post" class="bg-white rounded-xl shadow-sm p-5 mb-6 flex flex-wrap items-end gap-3">
+  {% csrf_token %}
+  <div><label class="text-xs text-gray-500 block">Name</label><input name="name" required class="rounded border border-gray-200 px-2 py-1.5 text-sm"></div>
+  <div><label class="text-xs text-gray-500 block">Adapter</label>
+    <select name="adapter" class="rounded border border-gray-200 px-2 py-1.5 text-sm">
+      <option value="openai">OpenAI / compatible</option><option value="gemini">Gemini</option><option value="anthropic">Anthropic</option>
+    </select></div>
+  <div><label class="text-xs text-gray-500 block">Base URL (blank = default)</label><input name="base_url" class="rounded border border-gray-200 px-2 py-1.5 text-sm w-64"></div>
+  <div><label class="text-xs text-gray-500 block">Model</label><input name="model" class="rounded border border-gray-200 px-2 py-1.5 text-sm w-44"></div>
+  <div><label class="text-xs text-gray-500 block">Priority (lower first)</label><input name="priority" value="10" class="w-20 rounded border border-gray-200 px-2 py-1.5 text-sm"></div>
+  <div><label class="text-xs text-gray-500 block">API key</label><input name="api_key" type="password" class="rounded border border-gray-200 px-2 py-1.5 text-sm w-56" placeholder="leave empty to keep current"></div>
+  <label class="text-xs text-gray-500 flex items-center gap-1"><input type="checkbox" name="enabled" checked> Enabled</label>
+  <button class="rounded-lg bg-[#16A34A] text-white text-sm px-4 py-1.5">Save provider</button>
+</form>
+<div class="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
+  <table class="w-full text-sm">
+    <thead class="bg-[#F3F7F4] text-left text-gray-500"><tr>
+      <th class="px-4 py-2">Provider</th><th class="px-4 py-2">Adapter</th><th class="px-4 py-2">Model</th>
+      <th class="px-4 py-2">Priority</th><th class="px-4 py-2">Key</th><th class="px-4 py-2">Health</th><th class="px-4 py-2">Replace key</th>
+    </tr></thead>
+    <tbody>
+      {% for p in provider_list %}
+      <tr class="border-t border-gray-100">
+        <td class="px-4 py-2 font-medium">{{ p.name }}</td>
+        <td class="px-4 py-2">{{ p.adapter }}</td>
+        <td class="px-4 py-2">{{ p.model|default:"default" }}</td>
+        <td class="px-4 py-2">{{ p.priority }}</td>
+        <td class="px-4 py-2">{{ p.has_api_key|yesno:"stored (encrypted),none" }}</td>
+        <td class="px-4 py-2"><span class="text-xs px-2 py-0.5 rounded-full {% if p.healthy %}bg-emerald-100 text-emerald-700{% else %}bg-red-100 text-red-700{% endif %}">{{ p.healthy|yesno:"healthy,failing" }}</span>
+          {% if p.last_error %}<div class="text-[11px] text-red-500 max-w-xs truncate">{{ p.last_error }}</div>{% endif %}</td>
+        <td class="px-4 py-2">
+          <form method="post" action="{% url 'panel_provider_key' p.pk %}" class="flex gap-1">
+            {% csrf_token %}
+            <input name="api_key" type="password" class="rounded border border-gray-200 px-2 py-1 text-xs w-40" placeholder="new key">
+            <button class="text-xs text-[#16A34A]">Save</button>
+          </form>
+          <a href="{% url 'panel_provider_test' p.pk %}" class="text-xs text-blue-600">Test connection</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<p class="text-xs text-gray-400">Failover order = priority. Transient errors (timeout / 429 / 5xx) try the next provider; invalid requests or credentials stop immediately. Every attempt is logged.</p>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "admin_panel/base.html" %}
+{% block title %}AI Control Center — Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">AI Control Center</h1>
+<div class="space-y-3">
+  {% for item in features %}
+  <form method="post" action="{% url 'panel_ai_feature' item.key %}" class="bg-white rounded-xl shadow-sm p-4 flex flex-wrap items-end gap-4">
+    {% csrf_token %}
+    <div class="w-56">
+      <div class="font-semibold text-sm">{{ item.key }}</div>
+      <label class="text-xs text-gray-500 flex items-center gap-1 mt-1">
+        <input type="checkbox" name="enabled" {% if item.setting and item.setting.enabled %}checked{% endif %}> Enabled
+      </label>
+    </div>
+    <div><label class="text-xs text-gray-500 block">Reward ads (blank = global)</label>
+      <input name="required_ads" value="{% if item.setting and item.setting.required_ads %}{{ item.setting.required_ads }}{% endif %}" class="w-20 rounded border border-gray-200 px-2 py-1 text-sm"></div>
+    <div><label class="text-xs text-gray-500 block">Daily limit</label>
+      <input name="daily_limit" value="{{ item.setting.daily_limit|default:10 }}" class="w-20 rounded border border-gray-200 px-2 py-1 text-sm"></div>
+    <div><label class="text-xs text-gray-500 block">Input limit</label>
+      <input name="input_limit" value="{{ item.setting.input_limit|default:4000 }}" class="w-24 rounded border border-gray-200 px-2 py-1 text-sm"></div>
+    <div><label class="text-xs text-gray-500 block">Output tokens</label>
+      <input name="output_tokens" value="{{ item.setting.output_tokens|default:512 }}" class="w-24 rounded border border-gray-200 px-2 py-1 text-sm"></div>
+    <button class="rounded-lg bg-[#16A34A] text-white text-sm px-4 py-1.5">Save</button>
+  </form>
+  {% endfor %}
+</div>
+<h2 class="font-semibold mt-8 mb-2">Recent generations</h2>
+<div class="bg-white rounded-xl shadow-sm p-4 text-sm space-y-1">
+  {% for g in generations %}<div class="flex justify-between border-b border-gray-50 pb-1"><span>{{ g.user.email }} · {{ g.feature }}</span><span class="text-gray-500">{{ g.status }} · {{ g.provider|default:"—" }}</span></div>{% endfor %}
+</div>
+{% endblock %}
