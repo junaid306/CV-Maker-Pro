@@ -74,13 +74,12 @@ class Command(BaseCommand):
 
         template, created = Template.objects.get_or_create(
             name="Aurora (demo)",
-            defaults={
-                "category": professional,
-                "status": Template.STATUS_PUBLISHED,
-                "definition": demo_definition(),
-            },
+            defaults={"category": professional},
         )
         if created:
+            from apps.templates_manager.services import save_template_version
+
+            save_template_version(template, demo_definition(), publish=True)
             self.stdout.write(self.style.SUCCESS(f"Created published template '{template.name}'"))
 
         enabled_features = [
@@ -90,10 +89,7 @@ class Command(BaseCommand):
             "cover_letter",
         ]
         for feature in enabled_features:
-            AiFeatureSetting.objects.get_or_create(
-                feature=feature,
-                defaults={"enabled": True, "label": feature.replace('_', ' ').title()},
-            )
+            AiFeatureSetting.objects.get_or_create(feature=feature, defaults={"enabled": True})
         for feature in FEATURE_SYSTEM_PROMPTS:
             if feature not in enabled_features:
                 AiFeatureSetting.objects.get_or_create(feature=feature, defaults={"enabled": False})
